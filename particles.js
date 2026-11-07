@@ -12,6 +12,7 @@
   let width = 0, height = 0, points = [], stars = [], frame = 0, last = 0;
   let hovering = false, burstUntil = 0, waveAt = -10000, introAt = 0;
   let visible = true, initialized = false, reduced = motion.matches;
+  let wordLight = null, energy = 0, settled = 1, sparks = [];
   const pointer = { x: -1000, y: -1000 };
   const random = (a, b) => a + Math.random() * (b - a);
   const glows = palette.map(color => {
@@ -40,24 +41,34 @@
     const m = mask.getContext('2d', { willReadFrequently: true });
     let size = Math.min(width * .22, height * .3, 140);
     m.font = `900 ${size}px Arial,sans-serif`;
-    size *= width * .84 / m.measureText('DANFIX').width;
+    size *= width * .88 / m.measureText('DANFIX').width;
     m.font = `900 ${size}px Arial,sans-serif`;
     m.textAlign = 'center'; m.textBaseline = 'middle'; m.fillStyle = '#fff';
     const cy = height * .46;
     m.fillText('DANFIX', width / 2, cy);
     const pixels = m.getImageData(0, 0, mask.width, mask.height).data;
+    wordLight = document.createElement('canvas');
+    wordLight.width = mask.width; wordLight.height = mask.height;
+    const light = wordLight.getContext('2d');
+    const ink = light.createLinearGradient(width*.08,0,width*.92,0);
+    ink.addColorStop(0,'#e5faff');ink.addColorStop(.48,'#8edfff');
+    ink.addColorStop(.53,'#2affdf');ink.addColorStop(1,'#3edcff');
+    light.font=m.font;light.textAlign='center';light.textBaseline='middle';
+    light.fillStyle=ink;light.shadowColor='#27cfe8';light.shadowBlur=18;
+    light.fillText('DANFIX',width/2,cy);
     const step = width < 400 ? 2 : 2.5;
     points = [];
     for (let y = 0; y < mask.height; y += step) {
       for (let x = 0; x < mask.width; x += step) {
         if (pixels[(Math.floor(y) * mask.width + Math.floor(x)) * 4 + 3] < 170) continue;
         const angle = Math.atan2(y - cy, (x - width / 2) * .75) + random(-.85, .85);
-        const radius = random(.15, .5);
+        const radius = random(.07, .46);
         const color = x < width * .51 ? (Math.random() < .75 ? 0 : 1) : (Math.random() < .8 ? 2 : 3);
-        const tx = width / 2 + Math.cos(angle) * width * radius;
-        const ty = cy + Math.sin(angle) * height * radius * .72;
+        const theta = angle + random(-1.25,1.25);
+        const tx = width / 2 + Math.cos(theta) * width * radius;
+        const ty = cy + Math.sin(theta) * height * radius * .9;
         points.push({ bx:x, by:y, x, y, vx:0, vy:0, tx, ty, angle,
-          color, size:random(.9, 1.3), phase:random(0, Math.PI * 2), depth:random(.5, 1.5) });
+          color, size:random(.9, 1.3), phase:random(0, Math.PI * 2), depth:random(.5, 1.5), z:random(-1,1) });
       }
     }
     stars = Array.from({ length: width < 400 ? 34 : 55 }, () => ({
@@ -75,8 +86,11 @@
   function explode(now = performance.now()) {
     if (reduced) return;
     waveAt = now;
+    sparks = Array.from({length:width<400?32:58},()=>({
+      angle:random(0,Math.PI*2),speed:random(.25,.85),length:random(8,34),color:Math.random()<.5?1:2
+    }));
     points.forEach(p => {
-      const force = random(5, 15) * Math.min(width / 500, 1.2);
+      const force = random(8, 23) * Math.min(width / 500, 1.2);
       p.vx += Math.cos(p.angle) * force;
       p.vy += Math.sin(p.angle) * force * .7;
     });
@@ -89,7 +103,16 @@
     const active = !reduced && (hovering || now < burstUntil);
     const intro = !reduced && introAt && now - introAt < 150;
     const time = reduced ? 0 : now * .001;
+    energy += ((active?1:0)-energy) * Math.min(1,dt*.07);
+    if(reduced)energy=0;
     ctx.clearRect(0, 0, width, height);
+    // A luminous core opens into a three-dimensional particle cloud.
+    if(energy>.01){
+      const core=ctx.createRadialGradient(width/2,height*.46,0,width/2,height*.46,width*.48);
+      core.addColorStop(0,'#d2ffff12');core.addColorStop(.2,'#21e9df1c');
+      core.addColorStop(.6,'#1476e310');core.addColorStop(1,'#1476e300');
+      ctx.globalAlpha=energy;ctx.fillStyle=core;ctx.fillRect(0,0,width,height);ctx.globalAlpha=1;
+    }
     // Quiet orbital traces give the light a sense of depth.
     ctx.save();
     ctx.translate(width / 2, height * .46);
@@ -97,6 +120,14 @@
     ctx.strokeStyle = '#4ac3df18'; ctx.lineWidth = .7;
     for (let i=0; i<2; i++) {
       ctx.beginPath(); ctx.ellipse(0,0,width*(.41+i*.08),height*(.2+i*.075),0,0,Math.PI*2); ctx.stroke();
+    }
+    if(!reduced){
+      ctx.strokeStyle='#50dfee';ctx.globalAlpha=.2+energy*.45;ctx.lineWidth=1;
+      for(let i=0;i<3;i++){
+        const a=time*(.18+energy*.35)+i*Math.PI*.7;
+        ctx.beginPath();ctx.ellipse(0,0,width*.43,height*.24,0,a,a+.15+energy*.2);ctx.stroke();
+      }
+      ctx.globalAlpha=1;
     }
     ctx.restore();
     for (const s of stars) {
@@ -116,15 +147,39 @@
       ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.stroke();
       ctx.globalAlpha=(1-progress)*.16;ctx.lineWidth=12;
       ctx.stroke();ctx.restore();
+      ctx.save();
+      ctx.globalCompositeOperation='lighter';
+      for(const spark of sparks){
+        const travel=width*spark.speed*(1-Math.pow(1-progress,2));
+        const sx=width/2+Math.cos(spark.angle)*travel;
+        const sy=height*.46+Math.sin(spark.angle)*travel*.65;
+        ctx.globalAlpha=Math.pow(1-progress,2)*.75;
+        ctx.strokeStyle=palette[spark.color];ctx.lineWidth=1;
+        ctx.beginPath();ctx.moveTo(sx,sy);
+        ctx.lineTo(sx-Math.cos(spark.angle)*spark.length*(1-progress),sy-Math.sin(spark.angle)*spark.length*(1-progress)*.65);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    if(wordLight){
+      ctx.globalAlpha=(reduced?1:settled)*(1-energy)*.55;
+      ctx.drawImage(wordLight,0,0);ctx.globalAlpha=1;
     }
 
     const damping = Math.pow(active ? .86 : .8, dt);
+    let displacement=0;
+    const turn=time*.32, cosine=Math.cos(turn), sine=Math.sin(turn);
     for (const p of points) {
       const ox=p.x, oy=p.y;
       if (reduced) { p.x=p.bx; p.y=p.by; p.vx=p.vy=0; }
       else if (!intro) {
-        let tx=active ? p.tx+Math.sin(time*.85+p.phase)*12*p.depth : p.bx;
-        let ty=active ? p.ty+Math.cos(time*.7+p.phase)*10*p.depth : p.by;
+        const dx3=p.tx-width/2, z3=p.z*width*.28;
+        const rx=dx3*cosine+z3*sine;
+        const rz=-dx3*sine+z3*cosine;
+        const perspective=1+rz/width*.48;
+        let tx=active ? width/2+rx*perspective+Math.sin(time+p.phase)*8 : p.bx;
+        let ty=active ? height*.46+(p.ty-height*.46)*perspective+Math.cos(time*.6+p.phase)*12 : p.by;
         if (active) {
           const dx=tx-pointer.x, dy=ty-pointer.y, d=Math.hypot(dx,dy);
           if (d>0 && d<85) { tx+=dx/d*(85-d)*.6; ty+=dy/d*(85-d)*.6; }
@@ -135,22 +190,24 @@
         p.x+=p.vx*dt;p.y+=p.vy*dt;
       }
       const speed=Math.hypot(p.vx,p.vy);
+      displacement+=Math.abs(p.x-p.bx)+Math.abs(p.y-p.by);
       ctx.fillStyle=palette[p.color];
       ctx.globalAlpha=active?.8:1;
       // Sparse luminous cores, crisp typography at rest.
       if (active || speed>1.5) {
-        if (speed>2) {
+        if (speed>1.1) {
           ctx.strokeStyle=palette[p.color];ctx.lineWidth=p.size*.7;
-          ctx.globalAlpha=Math.min(.65,speed*.045);
+          ctx.globalAlpha=Math.min(.7,speed*.06);
           ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(ox-p.vx*.9,oy-p.vy*.9);ctx.stroke();
         }
         ctx.globalAlpha=.48;
-        const size=p.size*8;
+        const size=p.size*(6+p.depth*4);
         ctx.drawImage(glows[p.color],p.x-size/2,p.y-size/2,size,size);
       }
       ctx.globalAlpha=active?.72+Math.sin(time*2+p.phase)*.2:.93;
       ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size*1.5,p.size*1.5);
     }
+    settled=1-Math.min(1,displacement/Math.max(1,points.length)/22);
     ctx.globalAlpha=1;
     // A slow highlight travels over the assembled letters, without flashing.
     if (!active && !reduced) {
