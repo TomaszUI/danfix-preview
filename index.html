@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="nb">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080f1c">
+<meta name="description" content="DANFIX – avansert elektronikkreparasjon. Reparasjon av PlayStation, Xbox, bærbare PC-er, HDMI-kontakter, kretskort og bilelektronikk.">
+<title>DANFIX | Avansert elektronikkreparasjon</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#070c15;--panel:#101b2b;--panel2:#152337;--ink:#f1f7ff;--muted:#99adc1;--cyan:#36dfe4;--blue:#368dff;--red:#ff5664;--line:#294054;--radius:19px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}button{cursor:pointer}.wrap{width:min(1180px,calc(100% - 40px));margin:auto}
+body:before{content:"";position:absolute;inset:0 0 auto;height:850px;pointer-events:none;background:radial-gradient(ellipse at 74% 11%,#0a4a6955,transparent 48%),radial-gradient(ellipse at 20% 30%,#2c2b6355,transparent 45%)}
+header{position:sticky;top:0;z-index:10;background:#08111ddf;backdrop-filter:blur(18px);border-bottom:1px solid #243849}.head{display:flex;align-items:center;justify-content:space-between;min-height:80px;gap:24px}.brand{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:.08em;font-size:25px}.brand .chip{width:38px;height:38px;display:grid;place-items:center;border:2px solid var(--cyan);border-radius:9px;box-shadow:0 0 16px #34dae54d;color:var(--cyan)}.brand em{font-style:normal;color:var(--cyan)}nav{display:flex;align-items:center;gap:22px}nav a{font-size:14px;color:#c2d1e4}nav a:hover,nav a:focus-visible{color:var(--cyan)}.menu{display:none;background:none;border:1px solid var(--line);color:white;padding:8px 12px;border-radius:9px}
+.btn{display:inline-flex;justify-content:center;align-items:center;gap:8px;min-height:46px;padding:10px 21px;border-radius:11px;border:1px solid #38cfd9;color:#051522;font-weight:750;background:linear-gradient(110deg,var(--cyan),#6d9cff);box-shadow:0 9px 24px #24aacc28}.btn:hover{filter:brightness(1.09)}.btn.alt{background:#142338;color:#dceeff;box-shadow:none;border-color:#385772}
+.hero{position:relative;padding:115px 0 105px;overflow:hidden}.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:65px;align-items:center}.eyebrow{text-transform:uppercase;letter-spacing:.2em;font-size:12px;font-weight:800;color:var(--cyan)}h1{font-size:clamp(43px,5.2vw,78px);line-height:1.07;letter-spacing:-.05em;margin:18px 0 23px}h1 span{background:linear-gradient(90deg,var(--cyan),#6b9eff);-webkit-background-clip:text;background-clip:text;color:transparent}h2{font-size:clamp(28px,3vw,43px);line-height:1.15;letter-spacing:-.035em;margin:9px 0 16px}h3{margin:0 0 9px;font-size:20px}.lead{font-size:19px;color:#b7c9da;max-width:580px}.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:31px}.microtext{color:#859db0;font-size:13px;margin-top:19px}.hero-art{position:relative;aspect-ratio:1/.9;border-radius:30px;border:1px solid #235573;background:radial-gradient(circle at center,#1a506c 0,#0b2135 47%,#091321 75%);display:grid;place-items:center;box-shadow:0 30px 100px #00bcff1b,inset 0 0 50px #51bff20c;overflow:hidden}.hero-art:before{content:"";position:absolute;inset:9%;border:1px solid #35bfe04d;border-radius:50%;box-shadow:0 0 42px #22c4f52c}.hero-art:after{content:"";position:absolute;width:150%;height:1px;background:linear-gradient(90deg,transparent,#20c5da77,transparent);transform:rotate(-34deg)}.board{position:relative;z-index:1;width:185px;height:185px;border:12px solid #1d3448;border-radius:27px;background:linear-gradient(135deg,#092435,#163451);display:grid;place-items:center;transform:rotate(-10deg);box-shadow:0 0 0 3px #57d8ed,0 0 40px #05b4e8a3,20px 27px 35px #0009}.board:before,.board:after{content:"";position:absolute;background:repeating-linear-gradient(90deg,var(--cyan) 0 7px,transparent 7px 19px);height:14px;left:10px;right:10px}.board:before{top:-30px}.board:after{bottom:-30px}.board b{font-size:61px;color:#bcecf5;text-shadow:0 0 20px #2febf5}.flare{position:absolute;right:10%;top:16%;height:150px;width:150px;background:radial-gradient(circle,#ff505655,transparent 65%)}
+section{position:relative;padding:76px 0}.section-lead{color:var(--muted);max-width:730px;margin:0 0 28px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:17px}.card{border:1px solid var(--line);background:linear-gradient(155deg,#14273a,#0d1727);border-radius:var(--radius);padding:28px;min-height:230px;transition:transform .2s,border-color .2s}.card:hover{transform:translateY(-3px);border-color:var(--cyan)}.symbol{font-size:30px;display:inline-grid;place-items:center;width:57px;height:57px;border-radius:14px;background:#103f5588;color:var(--cyan);margin-bottom:19px}.card p,.step p{color:#aebfd1;margin:0}.tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px}.tag{border:1px solid #34516a;background:#14263b;color:#cbd9e8;padding:4px 10px;border-radius:99px;font-size:12px}.strip{border:1px solid #244c69;border-radius:21px;background:linear-gradient(90deg,#102d43,#101829);padding:29px 35px;display:flex;align-items:center;justify-content:space-between;gap:22px}.strip p{margin:3px 0;color:var(--muted)}.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.step{position:relative;border-top:2px solid #31627c;padding-top:18px}.step strong{font-size:14px;color:var(--cyan);letter-spacing:.08em}.step h3{font-size:17px;margin-top:12px}
+.form-layout{display:grid;grid-template-columns:.85fr 1.15fr;gap:45px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:13px;color:#dce9f6;font-weight:680}.field input,.field select,.field textarea{width:100%;color:#f3f9ff;background:#081523;border:1px solid #39546d;border-radius:10px;padding:12px 13px;outline:0}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #24cce124}.formbox{border:1px solid #31506a;background:#111e30;padding:28px;border-radius:21px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}.full{grid-column:1/-1}.notice{border-left:3px solid var(--cyan);padding:12px 15px;background:#0d354052;color:#c3d8e6;font-size:13px;margin:21px 0}.help{font-size:13px;color:var(--muted)}.formbox .btn{border:0}.status{margin-top:13px;font-size:14px}
+footer{border-top:1px solid var(--line);padding:42px 0;background:#090e19;color:#a4b5c8}footer .foot{display:flex;justify-content:space-between;gap:30px;flex-wrap:wrap}footer strong{color:#fff}footer small{display:block;margin-top:7px}
+@media(max-width:900px){.hero-grid,.form-layout{grid-template-columns:1fr}.hero{padding-top:75px}.hero-art{max-height:380px}.cards{grid-template-columns:repeat(2,1fr)}nav{display:none;position:absolute;top:79px;left:0;right:0;flex-direction:column;align-items:stretch;padding:20px;background:#0c1827;border-bottom:1px solid #3b556b}nav.open{display:flex}.menu{display:block}.steps{grid-template-columns:repeat(2,1fr)}}@media(max-width:580px){.wrap{width:min(100% - 30px,1180px)}.hero{padding:57px 0}.hero-art{aspect-ratio:1.3}.board{width:130px;height:130px}.board b{font-size:39px}.cards,.steps,.fields{grid-template-columns:1fr}.strip{display:block}.strip .btn{margin-top:16px}.card{min-height:unset}.full{grid-column:auto}section{padding:57px 0}}
+
+/* DANFIX interactive particle hero */
+.hero-art{cursor:crosshair;touch-action:pan-y;background:radial-gradient(circle at 55% 42%,#123b54 0%,#071b2f 45%,#07101e 80%)}
+.hero-art canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;display:block}
+.hero-art .board{display:none}
+.hero-art .particle-caption{position:absolute;bottom:18px;z-index:3;left:0;right:0;text-align:center;color:#87b7cc;font-size:12px;letter-spacing:.08em;pointer-events:none}
+.hero-art:after{opacity:.32;z-index:0}
+@media(prefers-reduced-motion:reduce){.hero-art .particle-caption{display:none}}
+</style>
+</head>
+<body>
+<header><div class="wrap head"><a class="brand" href="#hjem" aria-label="DANFIX forside"><span class="chip">▣</span><span>DAN<em>FIX</em></span></a><button class="menu" aria-label="Åpne meny" aria-expanded="false" id="menu">☰ Meny</button><nav id="nav" aria-label="Hovedmeny"><a href="#tjenester">Tjenester</a><a href="#mikrolodding">Mikrolodding</a><a href="#slik-fungerer-det">Slik fungerer det</a><a href="#om-oss">Om oss</a><a href="#kontakt">Kontakt</a><a class="btn" href="#reparasjon">Registrer reparasjon ↗</a></nav></div></header>
+<main>
+<section class="hero" id="hjem"><div class="wrap hero-grid"><div><div class="eyebrow">DANFIX · Avansert elektronikkreparasjon</div><h1>Vi reparerer det andre <span>gir opp.</span></h1><p class="lead">Presisjonsarbeid på kretskort. HDMI-kontakter, spillkonsoller, bærbare PC-er og bilelektronikk – med fokus på feilsøking og reparasjon fremfor utskifting.</p><div class="actions"><a href="#reparasjon" class="btn">Beskriv feilen din ↗</a><a href="#tjenester" class="btn alt">Se våre tjenester</a></div><div class="microtext">Forhåndsvisning av ny nettside · Bestillingssystemet er ikke aktivert ennå</div></div><div class="hero-art" role="img" aria-label="Illustrasjon av mikrochip og elektronikkreparasjon"><div class="flare"></div><div class="board"><b>DF</b></div><canvas id="danfixParticles" aria-label="Interaktywny napis DANFIX z punktów światła"></canvas><div class="particle-caption">HOLD PEKEREN OVER DANFIX — PARTIKLENE SPRES OG SAMLES IGJEN</div></div></div></section>
+<section id="tjenester"><div class="wrap"><div class="eyebrow">Våre tjenester</div><h2>Fra ødelagt HDMI til avansert PCB-feil</h2><p class="section-lead">Hver reparasjon starter med å forstå årsaken til feilen. Vi viser hva slags arbeid verkstedet er planlagt for – konkrete tjenester bekreftes ved vurdering av enheten.</p><div class="cards">
+<article class="card"><span class="symbol">⌁</span><h3>Spillkonsoller</h3><p>PlayStation, Xbox og Nintendo. HDMI-porter, USB-kontakter, strømproblemer og feilsøking på hovedkort.</p><div class="tags"><span class="tag">HDMI</span><span class="tag">PS5</span><span class="tag">Xbox</span></div></article>
+<article class="card"><span class="symbol">▤</span><h3>PC og bærbare</h3><p>Skjermbytte, ladeporter, skadde kontakter, kretskort og strømforsyning.</p><div class="tags"><span class="tag">Laptop</span><span class="tag">USB-C</span><span class="tag">Hovedkort</span></div></article>
+<article class="card"><span class="symbol">▣</span><h3>Bilelektronikk</h3><p>Elektronikk skadet av fukt eller korrosjon, instrumentpaneler, radioer og elektroniske moduler.</p><div class="tags"><span class="tag">Instrument</span><span class="tag">Moduler</span><span class="tag">Korrosjon</span></div></article>
+<article class="card"><span class="symbol">⌘</span><h3>Mikrolodding</h3><p>Presisjonslodding under mikroskop, SMD-komponenter, ødelagte loddepunkter og reparasjon av PCB-baner.</p><div class="tags"><span class="tag">JBC</span><span class="tag">SMD</span><span class="tag">PCB</span></div></article>
+<article class="card"><span class="symbol">▥</span><h3>Skjermer og kontakter</h3><p>Utskifting av skjermmoduler, porter og andre fysisk skadde komponenter – etter modell og tilstand.</p><div class="tags"><span class="tag">Skjerm</span><span class="tag">Kontakt</span></div></article>
+<article class="card"><span class="symbol">⌕</span><h3>Feilsøking</h3><p>Systematisk diagnose av feil på kretskort, måling av spenningslinjer og vurdering av reparasjonsmuligheter.</p><div class="tags"><span class="tag">Diagnose</span><span class="tag">Elektronikk</span></div></article>
+</div></div></section>
+<section id="mikrolodding"><div class="wrap strip"><div><div class="eyebrow">Presisjon på komponentnivå</div><h2>Mikroskop. JBC. Dokumentert håndverk.</h2><p>Ikke bare bytte hele hovedkort – undersøk først om komponentene kan repareres.</p></div><a href="#reparasjon" class="btn">Spør om reparasjon ↗</a></div></section>
+<section id="slik-fungerer-det"><div class="wrap"><div class="eyebrow">Prosessen</div><h2>En ryddig vei fra feil til løsning</h2><div class="steps"><div class="step"><strong>01 / HENVENDELSE</strong><h3>Beskriv problemet</h3><p>Oppgi modell, symptomer og eventuell skadehistorikk.</p></div><div class="step"><strong>02 / VURDERING</strong><h3>Få en tilbakemelding</h3><p>Vi avklarer om enheten kan undersøkes og hvordan den kan leveres.</p></div><div class="step"><strong>03 / DIAGNOSE</strong><h3>Avtale før arbeid</h3><p>Pris og videre fremgangsmåte avklares før betalt arbeid.</p></div><div class="step"><strong>04 / REPARASJON</strong><h3>Test og retur</h3><p>Utført arbeid testes før enheten overleveres eller sendes tilbake.</p></div></div></div></section>
+<section id="reparasjon"><div class="wrap form-layout"><div><div class="eyebrow">Reparasjonsforespørsel</div><h2>Fortell oss hva som har skjedd</h2><p class="section-lead">Dette er en forhåndsvisning av skjemaet. I denne versjonen kan du åpne en e-postkladd med informasjonen. Ingen opplysninger lagres på nettstedet.</p><p class="help">Senere får DANFIX et sikkert kundesystem med bilder, saksnummer, status og varslinger. Dette settes ikke i drift før personvern og lagring er konfigurert.</p></div><div class="formbox"><form id="repairForm"><div class="fields">
+<div class="field"><label for="type">Type utstyr *</label><select id="type" required><option value="">Velg kategori</option><option>Spillkonsoll</option><option>PC / bærbar</option><option>Bilelektronikk</option><option>Skjerm / kontakt</option><option>Annen elektronikk</option></select></div>
+<div class="field"><label for="model">Merke og modell *</label><input id="model" maxlength="120" required placeholder="F.eks. PlayStation 5"></div>
+<div class="field full"><label for="issue">Beskriv feilen *</label><textarea id="issue" rows="5" minlength="10" maxlength="2500" required placeholder="Hva fungerer ikke? Når oppsto feilen? Har enheten vært utsatt for væske?"></textarea></div>
+<div class="field"><label for="name">Navn *</label><input id="name" required autocomplete="name" maxlength="100"></div>
+<div class="field"><label for="email">E-post *</label><input id="email" type="email" required autocomplete="email" maxlength="150"></div>
+<div class="field full"><label for="delivery">Ønsket levering</label><select id="delivery"><option>Jeg ønsker å sende inn enheten</option><option>Jeg ønsker å levere personlig</option><option>Jeg ønsker veiledning først</option></select></div>
+</div><div class="notice">Ingen automatisk innsending ennå. Knappen åpner e-postprogrammet ditt. Adressen serwis@danfix.no må opprettes før henvendelser kan mottas.</div><button class="btn" type="submit">Åpne e-postkladd ↗</button><p class="status" id="status" role="status" aria-live="polite"></p></form></div></div></section>
+<section id="om-oss"><div class="wrap"><div class="eyebrow">Om DANFIX</div><h2>Elektronikkfaglig presisjon</h2><p class="section-lead">DANFIX er en ny verkstedprofil utviklet av Tomasz Danielski, med fokus på praktisk feilsøking, presisjonslodding under mikroskop og reparasjon av elektroniske komponenter. Nettsiden er under utvikling og publiseres først når kontaktinformasjon og mottak av oppdrag er klare.</p></div></section>
+<section id="kontakt"><div class="wrap strip"><div><div class="eyebrow">Kontakt</div><h2>Har du en vanskelig elektronikkfeil?</h2><p>Planlagt kontakt: serwis@danfix.no · E-postadressen er ennå ikke aktivert.</p></div><a href="#reparasjon" class="btn">Beskriv utstyret ↗</a></div></section>
+</main><footer><div class="wrap foot"><div><strong>DANFIX</strong> · Avansert elektronikkreparasjon<small>© <span id="year"></span> DANFIX. Under utvikling.</small></div><div>Utviklet som et selvstendig prosjekt · Norge</div></div></footer>
+<script>
+document.getElementById("year").textContent=new Date().getFullYear();
+const menu=document.getElementById("menu"),nav=document.getElementById("nav");menu.addEventListener("click",()=>{const open=nav.classList.toggle("open");menu.setAttribute("aria-expanded",open)});nav.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{nav.classList.remove("open");menu.setAttribute("aria-expanded","false")}));
+document.getElementById("repairForm").addEventListener("submit",function(e){e.preventDefault();if(!this.reportValidity())return;const v=id=>document.getElementById(id).value.trim();const subject="DANFIX forespørsel – "+v("type")+" – "+v("model");const body=["Reparasjonsforespørsel DANFIX","","Navn: "+v("name"),"E-post: "+v("email"),"Kategori: "+v("type"),"Modell: "+v("model"),"Levering: "+v("delivery"),"","Beskrivelse:",""+v("issue"),"","Merk: DANFIX e-postadresse er ikke aktivert ennå."].join("\n");document.getElementById("status").textContent="E-postprogrammet åpnes. Ikke send før DANFIX har bekreftet at adressen er aktiv.";window.location.href="mailto:serwis@danfix.no?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body)});
+</script>
+<script>
+(function(){
+'use strict';
+const canvas=document.getElementById('danfixParticles');
+if(!canvas)return;
+const host=canvas.parentElement;
+const ctx=canvas.getContext('2d',{alpha:true});
+if(!ctx)return;
+const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let particles=[],width=0,height=0,scatter=false,progress=0,raf=0,resizeId;
+const rnd=(a,b)=>a+Math.random()*(b-a);
+function layout(){
+const rect=host.getBoundingClientRect(),dpr=Math.min(devicePixelRatio||1,2);
+width=Math.max(1,Math.round(rect.width));height=Math.max(1,Math.round(rect.height));
+canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
+ctx.setTransform(dpr,0,0,dpr,0,0);
+const off=document.createElement('canvas');off.width=width;off.height=height;
+const pctx=off.getContext('2d',{willReadFrequently:true});
+const font=Math.min(width*.195,height*.29,125);
+pctx.fillStyle='#fff';pctx.font='900 '+Math.round(font)+'px Arial,sans-serif';
+pctx.textAlign='center';pctx.textBaseline='middle';
+pctx.fillText('DANFIX',width/2,height/2);
+const data=pctx.getImageData(0,0,width,height).data;
+const step=width<450?4:3, centerX=width/2,centerY=height/2;
+particles=[];
+for(let y=0;y<height;y+=step)for(let x=0;x<width;x+=step){
+if(data[(y*width+x)*4+3]<160)continue;
+const theta=Math.atan2(y-centerY,x-centerX)+rnd(-.85,.85);
+const distance=rnd(95,Math.min(width*.72,420));
+particles.push({
+x:x+rnd(-3,3),y:y+rnd(-3,3),bx:x,by:y,
+tx:x+Math.cos(theta)*distance+rnd(-48,48),
+ty:y+Math.sin(theta)*distance*.75+rnd(-48,48),
+size:rnd(.8,1.85),alpha:rnd(.55,1),
+color:x>width*.51?(Math.random()>.17?'#26f5e5':'#4198ff'):(Math.random()>.24?'#e7f7ff':'#48b6ff')
+});
+}
+}
+function draw(){
+ctx.clearRect(0,0,width,height);
+if(!reduced)progress+=(Number(scatter)-progress)*.065;else progress=0;
+const t=progress*progress*(3-2*progress);
+ctx.shadowBlur=6;ctx.shadowColor='#28d5ed';
+for(let i=0;i<particles.length;i++){
+const p=particles[i];
+const tx=p.bx+(p.tx-p.bx)*t,ty=p.by+(p.ty-p.by)*t;
+p.x+=(tx-p.x)*.21;p.y+=(ty-p.y)*.21;
+ctx.globalAlpha=p.alpha*(1-.24*t);
+ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size*(1-.18*t),0,Math.PI*2);ctx.fill();
+}
+ctx.shadowBlur=0;ctx.globalAlpha=1;
+raf=requestAnimationFrame(draw);
+}
+function onEnter(e){if(!reduced&&e.pointerType!=='touch')scatter=true;}
+function onLeave(){scatter=false;}
+canvas.addEventListener('pointerenter',onEnter);
+canvas.addEventListener('pointerleave',onLeave);
+canvas.addEventListener('pointerdown',(e)=>{if(reduced)return;if(e.pointerType==='touch')scatter=!scatter;});
+window.addEventListener('resize',()=>{clearTimeout(resizeId);resizeId=setTimeout(layout,160)});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)scatter=false});
+layout();draw();
+})();
+</script>
+</body></html>
