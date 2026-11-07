@@ -14,3 +14,7 @@
 .particle-caption small{color:#6b98ad;font-size:10px;letter-spacing:.06em}
 @media(max-width:580px){.hero-art{min-height:290px;aspect-ratio:auto;height:300px}.energy-label{top:17px;left:18px;right:18px;font-size:9px}.particle-caption{bottom:17px}.energy-trigger{padding:8px 15px}}
 @media(prefers-reduced-motion:reduce){.energy-trigger{display:none}.particle-caption small{display:none}}
+.hero-art{transition:border-color .5s,box-shadow .5s}
+.hero-art.is-energized{border-color:#3adfd48c;box-shadow:0 25px 100px #00d9e323,0 0 28px #12d6df16,inset 0 0 80px #0ac9d40c}
+.hero-art.is-charging{border-color:#b0fff4;box-shadow:0 0 40px #38e7eb30,inset 0 0 65px #28bfd212}
+@media(prefers-reduced-motion:reduce){.hero-art{transition:none}}

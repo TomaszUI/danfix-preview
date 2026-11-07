@@ -13,6 +13,7 @@
   let hovering = false, burstUntil = 0, waveAt = -10000, introAt = 0;
   let visible = true, initialized = false, reduced = motion.matches;
   let wordLight = null, energy = 0, settled = 1, sparks = [];
+  let chargeUntil = 0, pendingBlast = false, wasActive = false, recallAt = -10000;
   const pointer = { x: -1000, y: -1000 };
   const random = (a, b) => a + Math.random() * (b - a);
   const glows = palette.map(color => {
@@ -68,7 +69,7 @@
         const tx = width / 2 + Math.cos(theta) * width * radius;
         const ty = cy + Math.sin(theta) * height * radius * .9;
         points.push({ bx:x, by:y, x, y, vx:0, vy:0, tx, ty, angle,
-          color, size:random(.9, 1.3), phase:random(0, Math.PI * 2), depth:random(.5, 1.5), z:random(-1,1) });
+          color, size:random(.9, 1.3), phase:random(0, Math.PI * 2), depth:random(.5, 1.5), z:random(-1,1), arm:Math.floor(random(0,3)) });
       }
     }
     stars = Array.from({ length: width < 400 ? 34 : 55 }, () => ({
@@ -85,6 +86,16 @@
 
   function explode(now = performance.now()) {
     if (reduced) return;
+    if (pendingBlast) return;
+    chargeUntil = now + 280;
+    pendingBlast = true;
+    host.classList.add('is-charging');
+    start();
+  }
+
+  function launch(now) {
+    pendingBlast = false;
+    host.classList.remove('is-charging');
     waveAt = now;
     sparks = Array.from({length:width<400?32:58},()=>({
       angle:random(0,Math.PI*2),speed:random(.25,.85),length:random(8,34),color:Math.random()<.5?1:2
@@ -101,9 +112,16 @@
     const dt = Math.min((now - last) / 16.667 || 1, 2);
     last = now;
     const active = !reduced && (hovering || now < burstUntil);
+    if(pendingBlast && !active){pendingBlast=false;host.classList.remove('is-charging');}
+    if(pendingBlast && now>=chargeUntil)launch(now);
+    const charging=pendingBlast && active;
+    const charge=charging?Math.max(0,1-(chargeUntil-now)/280):0;
+    if(wasActive && !active)recallAt=now;
+    if(wasActive!==active)host.classList.toggle('is-energized',active);
+    wasActive=active;
     const intro = !reduced && introAt && now - introAt < 150;
     const time = reduced ? 0 : now * .001;
-    energy += ((active?1:0)-energy) * Math.min(1,dt*.07);
+    energy += ((active&&!charging?1:0)-energy) * Math.min(1,dt*.07);
     if(reduced)energy=0;
     ctx.clearRect(0, 0, width, height);
     // A luminous core opens into a three-dimensional particle cloud.
@@ -137,6 +155,19 @@
     }
     ctx.globalAlpha = 1;
 
+    // Converging charge lines lead into the burst, rather than a white flash.
+    if(charging){
+      ctx.save();ctx.globalCompositeOperation='lighter';
+      ctx.strokeStyle='#8cfff0';ctx.lineWidth=1;ctx.globalAlpha=charge*.7;
+      for(let i=0;i<12;i++){
+        const a=i*Math.PI/6;
+        const r=width*(.44-charge*.16);
+        ctx.beginPath();ctx.moveTo(width/2+Math.cos(a)*r,height*.46+Math.sin(a)*r*.55);
+        ctx.lineTo(width/2+Math.cos(a)*(r+18),height*.46+Math.sin(a)*(r+18)*.55);ctx.stroke();
+      }
+      ctx.restore();
+    }
+
     const age = (now - waveAt) / 1000;
     if (!reduced && age >= 0 && age < 1.15) {
       const progress = age / 1.15;
@@ -147,6 +178,12 @@
       ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.stroke();
       ctx.globalAlpha=(1-progress)*.16;ctx.lineWidth=12;
       ctx.stroke();ctx.restore();
+      // Two tilted wave fronts expand through the depth of the scene.
+      ctx.save();ctx.translate(width/2,height*.46);ctx.rotate(-.4);
+      ctx.strokeStyle='#35ffe3';ctx.globalAlpha=(1-progress)*.45;ctx.lineWidth=1;
+      ctx.beginPath();ctx.ellipse(0,0,r*.85,r*.28,0,0,Math.PI*2);ctx.stroke();
+      ctx.rotate(.85);ctx.globalAlpha=(1-progress)*.24;
+      ctx.beginPath();ctx.ellipse(0,0,r*.95,r*.36,0,0,Math.PI*2);ctx.stroke();ctx.restore();
       ctx.save();
       ctx.globalCompositeOperation='lighter';
       for(const spark of sparks){
@@ -162,13 +199,33 @@
       ctx.restore();
     }
 
+    // Three comet heads trace the same tilted vortex as the particle arms.
+    if(energy>.05){
+      ctx.save();ctx.translate(width/2,height*.46);ctx.rotate(-.4);
+      ctx.globalCompositeOperation='lighter';
+      for(let arm=0;arm<3;arm++){
+        const a=time*.55+arm*Math.PI*2/3;
+        for(let tail=0;tail<16;tail++){
+          const t=a-tail*.028, r=width*.34;
+          const size=tail===0?22:Math.max(3,11-tail*.5);
+          ctx.globalAlpha=energy*(1-tail/16)*.7;
+          ctx.drawImage(glows[arm===0?0:2],Math.cos(t)*r-size/2,Math.sin(t)*r*.42-size/2,size,size);
+        }
+      }
+      ctx.restore();
+    }
+
     if(wordLight){
-      ctx.globalAlpha=(reduced?1:settled)*(1-energy)*.55;
-      ctx.drawImage(wordLight,0,0);ctx.globalAlpha=1;
+      ctx.globalAlpha=(reduced?1:settled)*(1-energy)*(.65+charge*.3);
+      const scale=1-charge*.1;
+      ctx.save();ctx.translate(width/2,height*.46);ctx.scale(scale,scale);
+      ctx.drawImage(wordLight,-width/2,-height*.46);ctx.restore();ctx.globalAlpha=1;
     }
 
     const damping = Math.pow(active ? .86 : .8, dt);
     let displacement=0;
+    const blastAge=(now-waveAt)/1000;
+    const vortex=Math.min(1,Math.max(0,(blastAge-.25)/1.3));
     const turn=time*.32, cosine=Math.cos(turn), sine=Math.sin(turn);
     for (const p of points) {
       const ox=p.x, oy=p.y;
@@ -180,11 +237,20 @@
         const perspective=1+rz/width*.48;
         let tx=active ? width/2+rx*perspective+Math.sin(time+p.phase)*8 : p.bx;
         let ty=active ? height*.46+(p.ty-height*.46)*perspective+Math.cos(time*.6+p.phase)*12 : p.by;
-        if (active) {
+        if(active && !charging){
+          const radius=width*(.1+(p.z+1)*.135);
+          const a=time*.55+p.arm*Math.PI*2/3+(p.z+1)*1.8+p.phase*.14;
+          const gx=Math.cos(a)*radius,gy=Math.sin(a)*radius*.42+Math.sin(p.phase*3+time)*height*.025;
+          const vx=gx*.921+gy*.389,vy=-gx*.389+gy*.921;
+          tx+=(width/2+vx-tx)*vortex;
+          ty+=(height*.46+vy-ty)*vortex;
+        }
+        if(charging){tx=width/2+(p.bx-width/2)*(1-charge*.1);ty=height*.46+(p.by-height*.46)*(1-charge*.1);}
+        if (active && !charging) {
           const dx=tx-pointer.x, dy=ty-pointer.y, d=Math.hypot(dx,dy);
           if (d>0 && d<85) { tx+=dx/d*(85-d)*.6; ty+=dy/d*(85-d)*.6; }
         }
-        const spring=active?.018:.045;
+        const spring=charging?.09:active?.024:.055;
         p.vx=(p.vx+(tx-p.x)*spring*dt)*damping;
         p.vy=(p.vy+(ty-p.y)*spring*dt)*damping;
         p.x+=p.vx*dt;p.y+=p.vy*dt;
@@ -197,8 +263,9 @@
       if (active || speed>1.5) {
         if (speed>1.1) {
           ctx.strokeStyle=palette[p.color];ctx.lineWidth=p.size*.7;
-          ctx.globalAlpha=Math.min(.7,speed*.06);
-          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(ox-p.vx*.9,oy-p.vy*.9);ctx.stroke();
+          ctx.globalAlpha=Math.min(.58,speed*.05);
+          const trail=Math.min(1,9/Math.max(1,speed));
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(ox-p.vx*trail,oy-p.vy*trail);ctx.stroke();
         }
         ctx.globalAlpha=.48;
         const size=p.size*(6+p.depth*4);
@@ -209,6 +276,18 @@
     }
     settled=1-Math.min(1,displacement/Math.max(1,points.length)/22);
     ctx.globalAlpha=1;
+    const recall=(now-recallAt)/1000;
+    if(!reduced && !active && recall>=0 && recall<1.4){
+      const r=width*.6*Math.pow(1-recall/1.4,2);
+      ctx.save();ctx.translate(width/2,height*.46);ctx.rotate(-.4);
+      ctx.globalAlpha=Math.sin(recall/1.4*Math.PI)*.5;ctx.strokeStyle='#b3fff9';ctx.lineWidth=1;
+      ctx.beginPath();ctx.ellipse(0,0,r,r*.42,0,0,Math.PI*2);ctx.stroke();ctx.restore();
+      if(settled>.6){
+        ctx.save();ctx.beginPath();ctx.rect(width*(recall/1.4)-30,0,32,height);ctx.clip();
+        ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(1-recall/1.4)*.7;
+        ctx.drawImage(wordLight,0,0);ctx.restore();
+      }
+    }
     // A slow highlight travels over the assembled letters, without flashing.
     if (!active && !reduced) {
       const scan=((time*.11)%1)*width;
@@ -245,9 +324,9 @@
   host.addEventListener('pointercancel',()=>{hovering=false;burstUntil=0;pointer.x=pointer.y=-1000;});
   host.addEventListener('click',e=>{
     if(e.target===trigger || trigger.contains(e.target))return;
-    burstUntil=performance.now()+1450;explode();
+    burstUntil=performance.now()+2600;explode();
   });
-  trigger.addEventListener('click',()=>{burstUntil=performance.now()+1600;explode();});
+  trigger.addEventListener('click',()=>{burstUntil=performance.now()+2800;explode();});
   host.addEventListener('keydown',e=>{
     if(e.key==='Escape'){hovering=false;burstUntil=0;pointer.x=pointer.y=-1000;}
   });
