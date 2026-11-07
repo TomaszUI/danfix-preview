@@ -6,13 +6,15 @@
   const host = canvas.parentElement;
   const ctx = canvas.getContext('2d');
   const trigger = document.getElementById('energyTrigger');
-  if (!ctx || !trigger) return;
+  const logo = document.getElementById('danfixLogo');
+  if (!ctx || !trigger || !logo) return;
   const motion = matchMedia('(prefers-reduced-motion: reduce)');
   const palette = ['#e1f9ff', '#68d6ff', '#21f4dc', '#378eff'];
   let width = 0, height = 0, points = [], stars = [], frame = 0, last = 0;
   let hovering = false, burstUntil = 0, waveAt = -10000, introAt = 0;
   let visible = true, initialized = false, reduced = motion.matches;
   let wordLight = null, energy = 0, settled = 1, sparks = [];
+  let imageBounds = null, imageRect = null, focusX=0, focusY=0;
   let chargeUntil = 0, pendingBlast = false, wasActive = false, recallAt = -10000;
   const pointer = { x: -1000, y: -1000 };
   const random = (a, b) => a + Math.random() * (b - a);
@@ -32,7 +34,7 @@
   function layout() {
     const rect = host.getBoundingClientRect();
     width = rect.width; height = rect.height;
-    if (!width || !height) return;
+    if (!width || !height || !logo.complete || !logo.naturalWidth) return;
     const dpr = Math.min(devicePixelRatio || 1, 2);
     canvas.width = Math.round(width * dpr);
     canvas.height = Math.round(height * dpr);
@@ -40,52 +42,70 @@
     const mask = document.createElement('canvas');
     mask.width = Math.ceil(width); mask.height = Math.ceil(height);
     const m = mask.getContext('2d', { willReadFrequently: true });
-    let size = Math.min(width * .22, height * .3, 140);
-    m.font = `900 ${size}px Arial,sans-serif`;
-    size *= width * .88 / m.measureText('DANFIX').width;
-    m.font = `900 ${size}px Arial,sans-serif`;
-    m.textAlign = 'center'; m.textBaseline = 'middle'; m.fillStyle = '#fff';
-    const cy = height * .46;
-    m.fillText('DANFIX', width / 2, cy);
-    const pixels = m.getImageData(0, 0, mask.width, mask.height).data;
-    wordLight = document.createElement('canvas');
-    wordLight.width = mask.width; wordLight.height = mask.height;
-    const light = wordLight.getContext('2d');
-    const ink = light.createLinearGradient(width*.08,0,width*.92,0);
-    ink.addColorStop(0,'#e5faff');ink.addColorStop(.48,'#8edfff');
-    ink.addColorStop(.53,'#2affdf');ink.addColorStop(1,'#3edcff');
-    light.font=m.font;light.textAlign='center';light.textBaseline='middle';
-    light.fillStyle=ink;light.shadowColor='#27cfe8';light.shadowBlur=18;
-    light.fillText('DANFIX',width/2,cy);
-    const step = width < 400 ? 2 : 2.5;
+    if (!imageBounds) {
+      const source = document.createElement('canvas');
+      source.width=logo.naturalWidth;source.height=logo.naturalHeight;
+      const sourceCtx=source.getContext('2d',{willReadFrequently:true});
+      sourceCtx.drawImage(logo,0,0);
+      const rgba=sourceCtx.getImageData(0,0,source.width,source.height).data;
+      let left=source.width,top=source.height,right=0,bottom=0;
+      for(let y=0;y<source.height;y+=2)for(let x=0;x<source.width;x+=2){
+        if(rgba[(y*source.width+x)*4+3]>24){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
+      }
+      imageBounds={x:Math.max(0,left-4),y:Math.max(0,top-4),w:right-left+8,h:bottom-top+8};
+    }
+    const cy=height*.46,b=imageBounds;
+    const fit=Math.min(width*.91/b.w,(height-132)/b.h);
+    imageRect={x:(width-b.w*fit)/2,y:cy-b.h*fit/2,w:b.w*fit,h:b.h*fit};
+    const r=imageRect;
+    focusX=r.x+(646-b.x)/b.w*r.w;focusY=r.y+(478-b.y)/b.h*r.h;
+    m.drawImage(logo,b.x,b.y,b.w,b.h,r.x,r.y,r.w,r.h);
+    const pixels=m.getImageData(0,0,mask.width,mask.height).data;
+    // Keep the original artwork sharp at device resolution; sample a separate
+    // low-resolution mask only for the particle simulation.
+    wordLight=document.createElement('canvas');
+    wordLight.width=canvas.width;wordLight.height=canvas.height;
+    const light=wordLight.getContext('2d');light.setTransform(dpr,0,0,dpr,0,0);
+    light.drawImage(logo,b.x,b.y,b.w,b.h,r.x,r.y,r.w,r.h);
+    const step=width<400?3:3.5;
     points = [];
     for (let y = 0; y < mask.height; y += step) {
       for (let x = 0; x < mask.width; x += step) {
-        if (pixels[(Math.floor(y) * mask.width + Math.floor(x)) * 4 + 3] < 170) continue;
-        const angle = Math.atan2(y - cy, (x - width / 2) * .75) + random(-.85, .85);
+        const index=(Math.floor(y)*mask.width+Math.floor(x))*4;
+        if(pixels[index+3]<90)continue;
+        const red=pixels[index],green=pixels[index+1],blue=pixels[index+2];
+        const brightness=Math.max(red,green,blue);
+        if(brightness<28)continue;
+        const angle = Math.atan2(y - focusY, (x - focusX) * .75) + random(-.85, .85);
         const radius = random(.07, .46);
-        const color = x < width * .51 ? (Math.random() < .75 ? 0 : 1) : (Math.random() < .8 ? 2 : 3);
+        const color=green>red*1.3?2:blue>red*1.3?1:0;
+        const ink='rgb('+red+','+green+','+blue+')';
         const theta = angle + random(-1.25,1.25);
         const tx = width / 2 + Math.cos(theta) * width * radius;
         const ty = cy + Math.sin(theta) * height * radius * .9;
         points.push({ bx:x, by:y, x, y, vx:0, vy:0, tx, ty, angle,
-          color, size:random(.9, 1.3), phase:random(0, Math.PI * 2), depth:random(.5, 1.5), z:random(-1,1), arm:Math.floor(random(0,3)) });
+          color, ink, brightness, size:random(.85, 1.5), phase:random(0, Math.PI * 2), depth:random(.5, 1.5), z:random(-1,1), arm:Math.floor(random(0,3)) });
       }
+    }
+    if(points.length>3200){
+      const spacing=points.length/3200;
+      points=Array.from({length:3200},(_,i)=>points[Math.floor(i*spacing)]);
     }
     stars = Array.from({ length: width < 400 ? 34 : 55 }, () => ({
       x:random(15,width-15), y:random(55,height-75), phase:random(0,7), size:random(.35,1.1)
     }));
     if (!initialized && !reduced) {
-      introAt = performance.now();
+      introAt = performance.now();settled=0;
       points.forEach(p => { p.x=p.tx; p.y=p.ty; });
     }
     initialized = true;
+    host.classList.add('logo-loaded');
     draw(performance.now());
     start();
   }
 
   function explode(now = performance.now()) {
-    if (reduced) return;
+    if (reduced || !points.length) return;
     if (pendingBlast) return;
     chargeUntil = now + 280;
     pendingBlast = true;
@@ -172,14 +192,14 @@
     if (!reduced && age >= 0 && age < 1.15) {
       const progress = age / 1.15;
       const r = (1 - Math.pow(1-progress,3)) * width * .72;
-      ctx.save(); ctx.translate(width/2,height*.46);
+      ctx.save(); ctx.translate(focusX,focusY);
       ctx.scale(1,.65); ctx.globalAlpha=(1-progress)*.6;
       ctx.strokeStyle='#8cffff';ctx.lineWidth=1.4;
       ctx.beginPath();ctx.arc(0,0,r,0,Math.PI*2);ctx.stroke();
       ctx.globalAlpha=(1-progress)*.16;ctx.lineWidth=12;
       ctx.stroke();ctx.restore();
       // Two tilted wave fronts expand through the depth of the scene.
-      ctx.save();ctx.translate(width/2,height*.46);ctx.rotate(-.4);
+      ctx.save();ctx.translate(focusX,focusY);ctx.rotate(-.4);
       ctx.strokeStyle='#35ffe3';ctx.globalAlpha=(1-progress)*.45;ctx.lineWidth=1;
       ctx.beginPath();ctx.ellipse(0,0,r*.85,r*.28,0,0,Math.PI*2);ctx.stroke();
       ctx.rotate(.85);ctx.globalAlpha=(1-progress)*.24;
@@ -188,8 +208,8 @@
       ctx.globalCompositeOperation='lighter';
       for(const spark of sparks){
         const travel=width*spark.speed*(1-Math.pow(1-progress,2));
-        const sx=width/2+Math.cos(spark.angle)*travel;
-        const sy=height*.46+Math.sin(spark.angle)*travel*.65;
+        const sx=focusX+Math.cos(spark.angle)*travel;
+        const sy=focusY+Math.sin(spark.angle)*travel*.65;
         ctx.globalAlpha=Math.pow(1-progress,2)*.75;
         ctx.strokeStyle=palette[spark.color];ctx.lineWidth=1;
         ctx.beginPath();ctx.moveTo(sx,sy);
@@ -216,10 +236,10 @@
     }
 
     if(wordLight){
-      ctx.globalAlpha=(reduced?1:settled)*(1-energy)*(.65+charge*.3);
+      ctx.globalAlpha=(reduced?1:Math.pow(settled,1.5))*(1-energy);
       const scale=1-charge*.1;
       ctx.save();ctx.translate(width/2,height*.46);ctx.scale(scale,scale);
-      ctx.drawImage(wordLight,-width/2,-height*.46);ctx.restore();ctx.globalAlpha=1;
+      ctx.drawImage(wordLight,-width/2,-height*.46,width,height);ctx.restore();ctx.globalAlpha=1;
     }
 
     const damping = Math.pow(active ? .86 : .8, dt);
@@ -257,21 +277,21 @@
       }
       const speed=Math.hypot(p.vx,p.vy);
       displacement+=Math.abs(p.x-p.bx)+Math.abs(p.y-p.by);
-      ctx.fillStyle=palette[p.color];
+      ctx.fillStyle=p.ink;
       ctx.globalAlpha=active?.8:1;
       // Sparse luminous cores, crisp typography at rest.
       if (active || speed>1.5) {
         if (speed>1.1) {
-          ctx.strokeStyle=palette[p.color];ctx.lineWidth=p.size*.7;
+          ctx.strokeStyle=p.ink;ctx.lineWidth=p.size*.7;
           ctx.globalAlpha=Math.min(.58,speed*.05);
           const trail=Math.min(1,9/Math.max(1,speed));
           ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(ox-p.vx*trail,oy-p.vy*trail);ctx.stroke();
         }
-        ctx.globalAlpha=.48;
+        ctx.globalAlpha=.25+(p.brightness/255)*.25;
         const size=p.size*(6+p.depth*4);
         ctx.drawImage(glows[p.color],p.x-size/2,p.y-size/2,size,size);
       }
-      ctx.globalAlpha=active?.72+Math.sin(time*2+p.phase)*.2:.93;
+      ctx.globalAlpha=reduced?0:active?.75+Math.sin(time*2+p.phase)*.15:1-Math.pow(settled,1.5);
       ctx.fillRect(p.x-p.size/2,p.y-p.size/2,p.size*1.5,p.size*1.5);
     }
     settled=1-Math.min(1,displacement/Math.max(1,points.length)/22);
@@ -285,10 +305,17 @@
       if(settled>.6){
         ctx.save();ctx.beginPath();ctx.rect(width*(recall/1.4)-30,0,32,height);ctx.clip();
         ctx.globalCompositeOperation='lighter';ctx.globalAlpha=(1-recall/1.4)*.7;
-        ctx.drawImage(wordLight,0,0);ctx.restore();
+        ctx.drawImage(wordLight,0,0,width,height);ctx.restore();
       }
     }
-    // A slow highlight travels over the assembled letters, without flashing.
+    if(!active && !reduced && imageRect && settled>.9){
+      const r=imageRect,b=imageBounds;
+      const tipX=r.x+(646-b.x)/b.w*r.w,tipY=r.y+(478-b.y)/b.h*r.h;
+      const glow=15+Math.sin(time*1.5)*3;
+      ctx.globalAlpha=.22+Math.sin(time*1.5)*.08;
+      ctx.drawImage(glows[2],tipX-glow/2,tipY-glow/2,glow,glow);ctx.globalAlpha=1;
+    }
+    // A slow highlight travels over the assembled artwork, without flashing.
     if (!active && !reduced) {
       const scan=((time*.11)%1)*width;
       ctx.globalCompositeOperation='lighter';
@@ -305,7 +332,7 @@
   function tick(now) {
     frame=0;
     if (!visible || document.hidden || reduced) return;
-    draw(now); frame=requestAnimationFrame(tick);
+    draw(now); if(!frame)frame=requestAnimationFrame(tick);
   }
   function start() {
     if (!frame && visible && !document.hidden && !reduced) {
@@ -341,5 +368,7 @@
     if(visible)start();else{hovering=false;burstUntil=0;stop();}
   },{threshold:.05}).observe(host);
   new ResizeObserver(layout).observe(host);
+  logo.addEventListener('load',layout);
+  logo.addEventListener('error',()=>{stop();host.classList.remove('logo-loaded');trigger.hidden=true;});
   layout();
 })();
