@@ -1,1 +1,15 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="15" fill="#091522"/><rect x="12" y="12" width="40" height="40" rx="8" fill="#122c40" stroke="#42d8e5" stroke-width="3"/><path d="M3 22h9M3 34h9M3 46h9M52 22h9M52 34h9M52 46h9" stroke="#47dbe5" stroke-width="3"/><text x="32" y="40" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="22" fill="#e6f9ff">DF</text><circle cx="50" cy="12" r="5" fill="#fa586b"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="DANFIX">
+<defs>
+<linearGradient id="chip" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#54f0ef"/><stop offset="1" stop-color="#378bff"/></linearGradient>
+<linearGradient id="inner" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#102c43"/><stop offset="1" stop-color="#0a1529"/></linearGradient>
+</defs>
+<rect width="64" height="64" rx="14" fill="#070e1b"/>
+<g stroke="url(#chip)" stroke-width="3" stroke-linecap="round">
+<path d="M19 6v8M31 6v8M43 6v8M19 50v8M31 50v8M43 50v8M6 19h8M6 31h8M6 43h8M50 19h8M50 31h8M50 43h8"/>
+</g>
+<rect x="13.5" y="13.5" width="37" height="37" rx="7" fill="url(#inner)" stroke="url(#chip)" stroke-width="3"/>
+<path d="M21 22h10c8 0 12 4 12 10s-4 10-12 10H21z" fill="none" stroke="#bfeeff" stroke-width="3.4" stroke-linejoin="round"/>
+<path d="M31 22v20M31 32h10" stroke="#3de4e7" stroke-width="3.2" stroke-linecap="round"/>
+<path d="M49 13l8-8" stroke="#7bb8ff" stroke-width="3" stroke-linecap="round"/>
+<circle cx="49" cy="14" r="3.8" fill="#ff526b"/>
+</svg>
