@@ -71,7 +71,7 @@ const sample=[
 let countries=[],current="EU",page="radio",query=null,offset=0,loading=false,active=null;
 const LIMIT=36,locale=new Intl.DisplayNames(["nb"],{type:"region"});
 let favorites=[];try{const x=JSON.parse(localStorage.getItem("danfix-radio-favorites-v1")||"[]");if(Array.isArray(x))favorites=x.filter(v=>v&&typeof v.url==="string"&&typeof v.name==="string").slice(0,200)}catch{}
-function safe(url){try{const x=new URL(url,location.href);return ["https:","http:"].includes(x.protocol)&&!x.username&&!x.password?x.href:null}catch{return null}}
+function safe(url){if(typeof url!=="string"||!url.trim())return null;try{const x=new URL(url.trim());return ["https:","http:"].includes(x.protocol)&&!x.username&&!x.password?x.href:null}catch{return null}}
 function el(tag,cls,txt){const x=document.createElement(tag);if(cls)x.className=cls;if(txt!==undefined)x.textContent=String(txt);return x}
 function flag(code){return /^[A-Z]{2}$/.test(code)?[...code].map(c=>String.fromCodePoint(c.charCodeAt(0)+127397)).join(""):"🌐"}
 function countryName(code){try{return locale.of(code)||code}catch{return code}}
